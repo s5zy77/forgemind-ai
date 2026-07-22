@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import api from '../services/api';
 import { Incident } from '../../../shared/types';
-import { Plus, AlertTriangle, CheckCircle, FileText, X } from 'lucide-react';
+import { Plus, AlertOctagon, CheckCircle2, ChevronRight, X, AlertTriangle, ShieldCheck } from 'lucide-react';
 
 export const IncidentsPage: React.FC = () => {
   const [incidents, setIncidents] = useState<Incident[]>([]);
@@ -50,32 +50,35 @@ export const IncidentsPage: React.FC = () => {
     }
   };
 
-  const getSeverityColor = (sev: string) => {
+  const getSeverityBadge = (sev: string) => {
     switch (sev) {
-      case 'critical': return '#ef4444';
-      case 'high': return '#f59e0b';
-      case 'medium': return '#22d3ee';
-      default: return '#a855f7';
+      case 'critical': return 'pill-red';
+      case 'high': return 'pill-orange';
+      case 'medium': return 'pill-blue';
+      default: return 'pill-green';
     }
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 select-none max-w-4xl mx-auto">
       <div className="flex justify-between items-center">
         <div>
-          <div className="section-title">Incident Timeline</div>
-          <div className="section-sub">Chronological view with AI-generated summaries and root cause analysis</div>
+          <div className="section-title text-base font-semibold">Incident Management</div>
+          <div className="section-sub text-xs text-[var(--text-mute)] font-medium">Log and track industrial system failures, trips, and diagnostics</div>
         </div>
 
-        <button onClick={() => setIsModalOpen(true)} className="btn-primary flex items-center gap-2">
-          <Plus size={16} /> Log New Incident
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="px-3 py-1.5 bg-[var(--primary)] text-[var(--bg)] font-medium rounded-lg text-xs flex items-center gap-1.5 hover:opacity-90 transition-all shadow-sm"
+        >
+          <Plus size={14} /> Log Incident
         </button>
       </div>
 
-      {/* Filter */}
-      <div className="flex justify-end gap-3">
+      {/* Filters */}
+      <div className="flex justify-end">
         <select
-          className="bg-[#111827] border border-white/10 rounded-lg px-3 py-2 text-xs text-slate-300 focus:outline-none"
+          className="bg-[var(--surface)] border border-[var(--border)] rounded-lg px-2.5 py-1.5 text-xs text-[var(--text-dim)] focus:outline-none focus:border-[var(--blue)]"
           value={severityFilter}
           onChange={(e) => setSeverityFilter(e.target.value)}
         >
@@ -87,87 +90,108 @@ export const IncidentsPage: React.FC = () => {
         </select>
       </div>
 
-      {/* Timeline Card */}
-      <div className="card space-y-4">
+      {/* Incidents timeline feed */}
+      <div className="space-y-4">
         {loading ? (
-          <div className="text-center py-8 text-xs text-slate-400">Loading incident history logs...</div>
+          <div className="text-center py-12 text-xs text-[var(--text-mute)]">Loading incident feed...</div>
         ) : incidents.length === 0 ? (
-          <div className="text-center py-8 text-xs text-slate-400">No incidents recorded for this filter.</div>
+          <div className="text-center py-12 text-xs text-[var(--text-mute)] border border-[var(--border)] rounded-xl bg-[var(--surface)]">
+            No incidents recorded for this severity.
+          </div>
         ) : (
           incidents.map((e) => {
-            const color = getSeverityColor(e.severity);
+            const badgeClass = getSeverityBadge(e.severity);
+            const isResolved = e.status === 'resolved';
+
             return (
-              <div key={e.id} className="flex gap-4 p-4 border-b border-white/10 last:border-0">
-                <div
-                  className="w-3 h-3 rounded-full mt-1.5 flex-shrink-0"
-                  style={{ background: color, boxShadow: `0 0 10px ${color}` }}
-                />
-                <div className="flex-1 space-y-1">
-                  <div className="flex justify-between items-center">
-                    <span className="font-semibold text-sm text-white">{e.title}</span>
-                    <span className="text-xs text-slate-500">{e.date}</span>
-                  </div>
-                  <div className="text-xs font-semibold" style={{ color }}>
-                    {e.severity.toUpperCase()} · {e.type}
-                  </div>
-                  <div className="text-xs text-slate-300 mt-1">{e.description}</div>
-                  {e.rootCause && (
-                    <div className="mt-2 text-xs bg-red-500/10 border border-red-500/20 p-2.5 rounded-lg text-red-300">
-                      <b>AI Root Cause:</b> {e.rootCause}
+              <div key={e.id} className="border border-[var(--border)] bg-[var(--surface)] p-4 rounded-xl shadow-sm hover:border-[var(--border-strong)] transition-all space-y-3">
+                <div className="flex justify-between items-start gap-4">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-semibold text-xs text-[var(--text)]">{e.title}</span>
+                      <span className={`pill ${badgeClass} text-[9.5px]`}>{e.severity}</span>
+                      {isResolved ? (
+                        <span className="flex items-center gap-0.5 text-[9.5px] px-1.5 py-0.5 bg-emerald-500/10 text-emerald-500 rounded border border-emerald-500/20">
+                          <ShieldCheck size={10} /> Resolved
+                        </span>
+                      ) : (
+                        <span className="flex items-center gap-0.5 text-[9.5px] px-1.5 py-0.5 bg-amber-500/10 text-amber-500 rounded border border-amber-500/20">
+                          <AlertOctagon size={10} /> Active
+                        </span>
+                      )}
                     </div>
-                  )}
-                  {e.resolution && (
-                    <div className="mt-1 text-xs bg-blue-500/10 border border-blue-500/20 p-2.5 rounded-lg text-blue-300">
-                      <b>Resolution:</b> {e.resolution}
+                    <div className="text-[10px] text-[var(--text-mute)] font-mono">
+                      Asset ID: {e.assetId || 'N/A'} · Logged {e.date}
                     </div>
-                  )}
+                  </div>
                 </div>
+
+                <div className="text-xs text-[var(--text-dim)] leading-relaxed">
+                  {e.description}
+                </div>
+
+                {(e.rootCause || e.resolution) && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-3 border-t border-[var(--border)]">
+                    {e.rootCause && (
+                      <div className="p-2.5 bg-[var(--surface-secondary)] border border-[var(--border)] rounded-lg text-xs text-[var(--text-dim)]">
+                        <div className="font-semibold text-[10px] text-[var(--text-mute)] uppercase tracking-wider mb-0.5">AI Root Cause Summary</div>
+                        {e.rootCause}
+                      </div>
+                    )}
+                    {e.resolution && (
+                      <div className="p-2.5 bg-[var(--surface-secondary)] border border-[var(--border)] rounded-lg text-xs text-[var(--text-dim)]">
+                        <div className="font-semibold text-[10px] text-[var(--text-mute)] uppercase tracking-wider mb-0.5">Technician Action Taken</div>
+                        {e.resolution}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             );
           })
         )}
       </div>
 
-      {/* Modal for Logging Incident */}
+      {/* Log Incident Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className="w-full max-w-lg rounded-2xl bg-[#0d1622] border border-white/10 p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-white/10">
-              <h3 className="text-base font-bold text-white font-heading">Log Operational Incident</h3>
-              <button onClick={() => setIsModalOpen(false)} className="p-1 rounded-lg text-slate-400 hover:bg-white/10">
-                <X size={18} />
+          <div className="w-full max-w-md rounded-2xl bg-[var(--surface)] border border-[var(--border)] p-5 shadow-2xl space-y-4">
+            <div className="flex justify-between items-center pb-3 border-b border-[var(--border)]">
+              <h3 className="text-sm font-bold text-[var(--text)] font-heading">Log System Incident</h3>
+              <button onClick={() => setIsModalOpen(false)} className="p-1 rounded-lg text-[var(--text-mute)] hover:bg-[var(--surface-secondary)]">
+                <X size={16} />
               </button>
             </div>
 
-            <form onSubmit={handleCreateIncident} className="space-y-4">
+            <form onSubmit={handleCreateIncident} className="space-y-3">
               <div>
-                <label className="block text-xs font-semibold text-slate-400 mb-1">Incident Title</label>
+                <label className="block text-[10px] font-bold text-[var(--text-mute)] uppercase tracking-wider mb-1">Incident Title</label>
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Pump-101 Thermal Overheating Trip"
-                  className="w-full bg-[#111827] border border-white/10 rounded-lg px-3 py-2 text-xs text-white"
+                  placeholder="e.g. Boiler-22 safety bypass check valve fail"
+                  className="w-full bg-[var(--surface-secondary)] border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[var(--text)] placeholder-[var(--text-mute)] focus:outline-none focus:border-[var(--blue)] transition-all"
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-400 mb-1">Asset ID</label>
+                  <label className="block text-[10px] font-bold text-[var(--text-mute)] uppercase tracking-wider mb-1">Asset ID</label>
                   <input
                     type="text"
                     required
-                    className="w-full bg-[#111827] border border-white/10 rounded-lg px-3 py-2 text-xs text-white"
+                    className="w-full bg-[var(--surface-secondary)] border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[var(--text)] focus:outline-none focus:border-[var(--blue)] transition-all"
                     value={newAssetId}
                     onChange={(e) => setNewAssetId(e.target.value)}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-400 mb-1">Severity</label>
+                  <label className="block text-[10px] font-bold text-[var(--text-mute)] uppercase tracking-wider mb-1">Severity</label>
                   <select
-                    className="w-full bg-[#111827] border border-white/10 rounded-lg px-3 py-2 text-xs text-white"
+                    className="w-full bg-[var(--surface-secondary)] border border-[var(--border)] rounded-lg px-2.5 py-1.5 text-xs text-[var(--text-dim)] focus:outline-none focus:border-[var(--blue)]"
                     value={newSeverity}
                     onChange={(e) => setNewSeverity(e.target.value)}
                   >
@@ -180,28 +204,28 @@ export const IncidentsPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-400 mb-1">Description</label>
+                <label className="block text-[10px] font-bold text-[var(--text-mute)] uppercase tracking-wider mb-1">Telemetry Description</label>
                 <textarea
                   required
                   rows={3}
-                  placeholder="Describe failure circumstances..."
-                  className="w-full bg-[#111827] border border-white/10 rounded-lg px-3 py-2 text-xs text-white"
+                  placeholder="Describe failure variables..."
+                  className="w-full bg-[var(--surface-secondary)] border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[var(--text)] placeholder-[var(--text-mute)] focus:outline-none focus:border-[var(--blue)] transition-all"
                   value={newDescription}
                   onChange={(e) => setNewDescription(e.target.value)}
                 />
               </div>
 
-              <div className="flex justify-end gap-3 pt-3 border-t border-white/10">
+              <div className="flex justify-end gap-3 pt-3 border-t border-[var(--border)]">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 text-xs text-slate-300 border border-white/10 rounded-lg hover:bg-white/5"
+                  className="px-4 py-1.5 text-xs text-[var(--text-dim)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-secondary)]"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 text-xs text-white bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg shadow-lg hover:opacity-90"
+                  className="px-4 py-1.5 text-xs text-[var(--bg)] bg-[var(--primary)] font-semibold rounded-lg hover:opacity-90 shadow-sm transition-all"
                 >
                   Submit Incident
                 </button>

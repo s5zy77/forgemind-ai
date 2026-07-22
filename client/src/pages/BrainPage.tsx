@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, Mic, Paperclip, Sparkles, CheckCircle2, FileText } from 'lucide-react';
+import { Send, Mic, Paperclip, Sparkles, CheckCircle2, FileText, Bot, User } from 'lucide-react';
 import api from '../services/api';
 import { AIChatMessage } from '../../../shared/types';
 
@@ -14,7 +14,6 @@ export const BrainPage: React.FC = () => {
   ]);
   const [inputQuery, setInputQuery] = useState('');
   const [loading, setLoading] = useState(false);
-  const [panelWidth, setPanelWidth] = useState(260);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const suggestedPrompts = [
@@ -24,7 +23,6 @@ export const BrainPage: React.FC = () => {
     'Compare Compressor-X4 and X5',
   ];
 
-  // Auto-scroll chat container on new content
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
@@ -50,7 +48,6 @@ export const BrainPage: React.FC = () => {
       const fullText = res.data.text;
       const responseId = `ai-${Date.now()}`;
 
-      // Initialize streaming block
       const initAiMsg: AIChatMessage = {
         id: responseId,
         role: 'ai',
@@ -94,94 +91,93 @@ export const BrainPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-4 h-full flex flex-col">
+    <div className="space-y-4 h-full flex flex-col max-w-4xl mx-auto select-none">
       <div>
-        <div className="section-title">Operations Brain</div>
-        <div className="section-sub">Natural-language reasoning across assets, documents, and operational history.</div>
+        <div className="section-title text-base font-semibold">Operations Brain</div>
+        <div className="section-sub text-xs text-[var(--text-mute)] font-medium">Natural-language reasoning grounded by telemetry & documentation manuals</div>
       </div>
 
-      <div 
-        className="chat-shell flex-grow"
-        style={{ gridTemplateColumns: `${panelWidth}px 1fr` }}
-      >
-        {/* Chat History Sidebar */}
-        <div className="card chat-history hidden md:block select-none">
-          <div className="text-[11.5px] text-[var(--text-mute)] uppercase tracking-wider mb-3 font-semibold">
-            Recent Sessions
-          </div>
-          {suggestedPrompts.map((prompt, idx) => (
-            <div
-              key={idx}
-              className={`chat-hist-item ${idx === 0 ? 'active' : ''}`}
-              onClick={() => handleSend(prompt)}
-            >
-              {prompt}
-            </div>
-          ))}
-        </div>
+      {/* Main Chat Area */}
+      <div className="border border-[var(--border)] bg-[var(--surface)] rounded-xl flex flex-col h-[520px] shadow-sm relative overflow-hidden">
+        {/* Messages List */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-6">
+          {messages.map((m) => {
+            const isAi = m.role === 'ai';
+            return (
+              <div key={m.id} className={`flex gap-3 ${isAi ? '' : 'flex-row-reverse'}`}>
+                {/* Avatar Indicator */}
+                <div className={`w-7 h-7 rounded-lg border flex items-center justify-center flex-shrink-0 ${isAi ? 'bg-[var(--surface-secondary)] border-[var(--border)] text-[var(--blue)]' : 'bg-[var(--primary)] border-[var(--primary)] text-[var(--bg)]'}`}>
+                  {isAi ? <Bot size={14} /> : <User size={14} />}
+                </div>
 
-        {/* Main Chat Interface */}
-        <div className="card chat-main flex flex-col h-full relative overflow-hidden bg-[var(--card)] border-[var(--border)]">
-          <div className="chat-messages flex-grow overflow-y-auto space-y-4 pb-24 pr-2">
-            {messages.map((m) => (
-              <div key={m.id} className={`msg ${m.role} animate-fadeIn`}>
-                <div
-                  className="msg-bubble"
-                  dangerouslySetInnerHTML={{ __html: m.text }}
-                />
-                {(m.sources || m.confidence) && (
-                  <div className="msg-meta">
-                    {m.sources?.map((s, idx) => (
-                      <span key={idx} className="chip flex items-center gap-1">
-                        <FileText size={10} /> {s}
-                      </span>
-                    ))}
-                    {m.confidence && (
-                      <span className="chip confidence flex items-center gap-1">
-                        <CheckCircle2 size={10} /> Confidence: {m.confidence}%
-                      </span>
-                    )}
-                  </div>
-                )}
-              </div>
-            ))}
-            {loading && (
-              <div className="msg ai">
-                <div className="msg-bubble text-slate-400 text-xs flex items-center gap-2">
-                  <Sparkles size={14} className="animate-spin text-cyan-400" />
-                  Synthesizing multi-modal telemetry and equipment manuals...
+                <div className={`space-y-1.5 max-w-[75%] ${isAi ? '' : 'items-end'}`}>
+                  <div 
+                    className={`p-3 rounded-xl text-xs leading-relaxed ${isAi ? 'bg-[var(--surface-secondary)] border border-[var(--border)] text-[var(--text)]' : 'bg-[var(--primary)] text-[var(--bg)] font-medium'}`}
+                    dangerouslySetInnerHTML={{ __html: m.text }}
+                  />
+
+                  {isAi && (m.sources || m.confidence) && (
+                    <div className="flex flex-wrap gap-2 pt-1">
+                      {m.sources?.map((s, idx) => (
+                        <span key={idx} className="flex items-center gap-1 text-[9.5px] px-2 py-0.5 border border-[var(--border)] bg-[var(--surface)] text-[var(--text-dim)] rounded">
+                          <FileText size={10} /> {s}
+                        </span>
+                      ))}
+                      {m.confidence && (
+                        <span className="flex items-center gap-1 text-[9.5px] px-2 py-0.5 border border-[var(--blue)] bg-[var(--surface)] text-[var(--blue)] font-semibold rounded">
+                          <CheckCircle2 size={10} /> Confidence: {m.confidence}%
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
-            )}
-            <div ref={messagesEndRef} />
-          </div>
-
-          {/* Suggested Prompts */}
-          <div className="prompt-row mt-3">
-            {suggestedPrompts.map((p, idx) => (
-              <div key={idx} className="suggested" onClick={() => handleSend(p)}>
-                {p}
+            );
+          })}
+          {loading && (
+            <div className="flex gap-3">
+              <div className="w-7 h-7 rounded-lg border border-[var(--border)] bg-[var(--surface-secondary)] text-[var(--blue)] flex items-center justify-center">
+                <Bot size={14} />
               </div>
+              <div className="p-3 bg-[var(--surface-secondary)] border border-[var(--border)] rounded-xl text-xs text-[var(--text-mute)] flex items-center gap-2">
+                <Sparkles size={13} className="animate-spin text-[var(--blue)]" />
+                <span>Searching manuals & telemetry streams...</span>
+              </div>
+            </div>
+          )}
+          <div ref={messagesEndRef} />
+        </div>
+
+        {/* Footer Area: Suggested Prompts & Input */}
+        <div className="p-4 border-t border-[var(--border)] bg-[var(--surface-secondary)] space-y-3">
+          {/* Prompts suggestions row */}
+          <div className="flex flex-wrap gap-2 justify-center">
+            {suggestedPrompts.map((p, idx) => (
+              <button
+                key={idx}
+                onClick={() => handleSend(p)}
+                className="px-2.5 py-1 bg-[var(--surface)] border border-[var(--border)] rounded-lg text-[10.5px] text-[var(--text-dim)] font-medium hover:bg-[var(--surface-secondary)] hover:text-[var(--text)] transition-all"
+              >
+                {p}
+              </button>
             ))}
           </div>
 
-          {/* Input Bar */}
-          <div className="chat-input-row">
-            <button className="mini-icon-btn text-[var(--text-mute)] hover:text-white" title="Voice Input">
-              <Mic size={16} />
-            </button>
-            <button className="mini-icon-btn text-[var(--text-mute)] hover:text-white" title="Attach Document / Manual">
-              <Paperclip size={16} />
-            </button>
+          {/* Form input bar */}
+          <div className="flex items-center gap-2">
             <input
-              className="chat-input border-[var(--border)] bg-[var(--card2)] text-[var(--text)] placeholder-[var(--text-mute)]"
-              placeholder="Ask about any asset, failure, or maintenance plan..."
+              type="text"
+              placeholder="Ask operations agent about failure status, boiler threshold limits, compressor air logs..."
+              className="flex-1 bg-[var(--surface)] border border-[var(--border)] rounded-lg px-3 py-2 text-xs text-[var(--text)] placeholder-[var(--text-mute)] focus:outline-none focus:border-[var(--blue)] transition-all shadow-inner"
               value={inputQuery}
               onChange={(e) => setInputQuery(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSend()}
             />
-            <button className="send-btn" onClick={() => handleSend()}>
-              <Send size={16} />
+            <button
+              onClick={() => handleSend()}
+              className="w-8 h-8 rounded-lg bg-[var(--primary)] text-[var(--bg)] flex items-center justify-center hover:opacity-90 transition-all shadow"
+            >
+              <Send size={13} />
             </button>
           </div>
         </div>

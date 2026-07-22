@@ -13,42 +13,44 @@ export const ReportsPage: React.FC = () => {
   };
 
   const reportCards = [
-    { type: 'maintenance', title: 'Maintenance Report', icon: FileSpreadsheet, sub: 'Last 30 days servicing logs' },
-    { type: 'incidents', title: 'Incident Report', icon: AlertOctagon, sub: 'Severity & root cause logs' },
-    { type: 'assets', title: 'Asset Fleet Report', icon: FileText, sub: '147 assets & health scores' },
-    { type: 'executive', title: 'Executive Summary', icon: BarChart2, sub: 'AI generated operational overview' },
+    { type: 'maintenance', title: 'Maintenance Records', icon: FileSpreadsheet, sub: 'Outage & servicing logs' },
+    { type: 'incidents', title: 'Incident Analytics', icon: AlertOctagon, sub: 'Outage triggers & severity levels' },
+    { type: 'assets', title: 'Asset Fleet Status', icon: FileText, sub: 'Full inventory asset metrics' },
+    { type: 'executive', title: 'Executive Summary', icon: BarChart2, sub: 'AI summary & RUL analysis' },
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 select-none max-w-4xl mx-auto">
       <div>
-        <div className="section-title">Report Generator</div>
-        <div className="section-sub">AI-generated, exportable PDF and CSV plant reports</div>
+        <div className="section-title text-base font-semibold">Report Generator</div>
+        <div className="section-sub text-xs text-[var(--text-mute)] font-medium">Export and download real-time generated reports in PDF and CSV format</div>
       </div>
 
-      <div className="grid grid-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {reportCards.map((r) => {
           const Icon = r.icon;
           return (
-            <div key={r.type} className="card flex flex-col items-center text-center space-y-3">
-              <div className="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center">
-                <Icon size={24} />
+            <div key={r.type} className="card border border-[var(--border)] bg-[var(--surface)] p-5 rounded-xl shadow-sm flex flex-col items-center text-center space-y-4">
+              <div className="w-10 h-10 rounded-lg bg-[var(--surface-secondary)] border border-[var(--border)] text-[var(--blue)] flex items-center justify-center">
+                <Icon size={18} />
               </div>
-              <div className="font-semibold text-sm text-white font-heading">{r.title}</div>
-              <div className="text-xs text-slate-500">{r.sub}</div>
+              <div className="space-y-1">
+                <div className="font-semibold text-xs text-[var(--text)]">{r.title}</div>
+                <div className="text-[10.5px] text-[var(--text-mute)] leading-normal line-clamp-2">{r.sub}</div>
+              </div>
 
               <div className="flex gap-2 w-full pt-2">
                 <button
                   onClick={() => handleDownload(r.type, 'csv')}
-                  className="flex-1 py-2 text-xs font-semibold text-slate-300 bg-white/5 border border-white/10 rounded-lg hover:bg-white/10 flex items-center justify-center gap-1"
+                  className="flex-1 py-1.5 text-[11px] font-medium text-[var(--text-dim)] bg-[var(--surface)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-secondary)] transition-all flex items-center justify-center gap-1 shadow-sm"
                 >
-                  <Download size={12} /> CSV
+                  <Download size={11} /> CSV
                 </button>
                 <button
                   onClick={() => handleDownload(r.type, 'pdf')}
-                  className="flex-1 py-2 text-xs font-semibold text-white bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg hover:opacity-90 flex items-center justify-center gap-1 shadow-md"
+                  className="flex-1 py-1.5 text-[11px] font-medium text-[var(--bg)] bg-[var(--primary)] rounded-lg hover:opacity-90 transition-all flex items-center justify-center gap-1 shadow-sm"
                 >
-                  <Download size={12} /> PDF
+                  <Download size={11} /> PDF
                 </button>
               </div>
             </div>

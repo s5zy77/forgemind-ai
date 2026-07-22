@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import api from '../services/api';
 import { Asset } from '../../../shared/types';
 import { AssetModal } from '../components/AssetModal';
-import { Plus, Edit2, Trash2, Search } from 'lucide-react';
+import { Plus, Edit2, Trash2, Search, SlidersHorizontal, Settings2, HelpCircle } from 'lucide-react';
 import { useSocket } from '../context/SocketContext';
 
 export const AssetsPage: React.FC = () => {
@@ -68,11 +68,12 @@ export const AssetsPage: React.FC = () => {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 select-none">
+      {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="section-title">Asset Management</div>
-          <div className="section-sub">{displayAssets.length} registered assets across plant zones</div>
+          <div className="section-title text-base font-semibold">Asset Inventory</div>
+          <div className="section-sub text-xs text-[var(--text-mute)]">Review and manage 147 assets across plant zones</div>
         </div>
 
         <button
@@ -80,28 +81,33 @@ export const AssetsPage: React.FC = () => {
             setEditingAsset(null);
             setIsModalOpen(true);
           }}
-          className="btn-primary flex items-center gap-2 self-start"
+          className="px-3 py-1.5 bg-[var(--primary)] text-[var(--bg)] font-medium rounded-lg text-xs flex items-center gap-1.5 hover:opacity-90 transition-all shadow-sm"
         >
-          <Plus size={16} /> Register New Asset
+          <Plus size={14} /> Register Asset
         </button>
       </div>
 
-      {/* Filters Bar */}
-      <div className="flex flex-wrap gap-4 items-center bg-[#111827] border border-white/10 p-4 rounded-xl">
-        <div className="relative flex-1 min-w-[200px]">
-          <Search size={16} className="absolute left-3 top-3 text-slate-400" />
+      {/* Filter / Search Panel (Stripe / Linear-style border layout) */}
+      <div className="flex flex-wrap gap-3 items-center justify-between p-3 border border-[var(--border)] bg-[var(--surface)] rounded-xl shadow-sm">
+        <div className="relative flex-1 max-w-sm">
+          <Search size={14} className="absolute left-3 top-2.5 text-[var(--text-mute)]" />
           <input
             type="text"
-            placeholder="Search assets by ID, name, or type..."
-            className="w-full bg-[#0d1622] border border-white/10 rounded-lg pl-9 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+            placeholder="Search by ID, name, or model..."
+            className="w-full bg-[var(--surface-secondary)] border border-[var(--border)] rounded-lg pl-9 pr-3 py-1.5 text-xs text-[var(--text)] placeholder-[var(--text-mute)] focus:outline-none focus:border-[var(--blue)] transition-all"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
 
-        <div className="flex gap-3">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5">
+            <SlidersHorizontal size={13} className="text-[var(--text-mute)]" />
+            <span className="text-[11px] text-[var(--text-dim)] font-medium">Filters:</span>
+          </div>
+
           <select
-            className="bg-[#0d1622] border border-white/10 rounded-lg px-3 py-2 text-xs text-slate-300 focus:outline-none"
+            className="bg-[var(--surface-secondary)] border border-[var(--border)] rounded-lg px-2.5 py-1.5 text-xs text-[var(--text-dim)] focus:outline-none focus:border-[var(--blue)]"
             value={zoneFilter}
             onChange={(e) => setZoneFilter(e.target.value)}
           >
@@ -113,7 +119,7 @@ export const AssetsPage: React.FC = () => {
           </select>
 
           <select
-            className="bg-[#0d1622] border border-white/10 rounded-lg px-3 py-2 text-xs text-slate-300 focus:outline-none"
+            className="bg-[var(--surface-secondary)] border border-[var(--border)] rounded-lg px-2.5 py-1.5 text-xs text-[var(--text-dim)] focus:outline-none focus:border-[var(--blue)]"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
           >
@@ -125,79 +131,81 @@ export const AssetsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Assets Table */}
-      <div className="card">
+      {/* Modern Data Table */}
+      <div className="border border-[var(--border)] bg-[var(--surface)] rounded-xl overflow-hidden shadow-sm">
         <div className="table-wrap">
-          <table>
+          <table className="min-w-full">
             <thead>
               <tr>
                 <th>Asset ID</th>
                 <th>Location</th>
-                <th>Health Score</th>
-                <th>Telemetry</th>
+                <th>Health index</th>
+                <th>Sensors</th>
                 <th>Status</th>
-                <th>Next Maintenance</th>
-                <th>AI Recommendation</th>
-                <th>Actions</th>
+                <th>Maintenance window</th>
+                <th>AI Actions</th>
+                <th className="text-right">Manage</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={8} className="text-center py-8 text-xs text-slate-400">
-                    Loading asset fleet data...
+                  <td colSpan={8} className="text-center py-10 text-xs text-[var(--text-mute)]">
+                    Loading asset inventory nodes...
                   </td>
                 </tr>
               ) : displayAssets.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="text-center py-8 text-xs text-slate-400">
-                    No assets matched current filter parameters.
+                  <td colSpan={8} className="text-center py-10 text-xs text-[var(--text-mute)]">
+                    No active assets match criteria.
                   </td>
                 </tr>
               ) : (
                 displayAssets.map((a) => {
-                  const healthColor = a.health > 70 ? '#22c55e' : a.health > 45 ? '#f59e0b' : '#ef4444';
+                  const healthColor = a.health > 70 ? 'var(--green)' : a.health > 45 ? 'var(--orange)' : 'var(--red)';
                   const pillClass = a.status === 'healthy' ? 'pill-green' : a.status === 'warning' ? 'pill-orange' : 'pill-red';
 
                   return (
-                    <tr key={a.id} className="asset-row">
-                      <td className="font-semibold text-white">
+                    <tr key={a.id} className="asset-row hover:bg-[var(--surface-secondary)] transition-all">
+                      <td className="font-semibold text-[var(--text)]">
                         <div>{a.id}</div>
-                        <div className="text-[11px] text-slate-400 font-normal">{a.name}</div>
+                        <div className="text-[10.5px] text-[var(--text-mute)] font-normal">{a.name}</div>
                       </td>
-                      <td className="text-slate-400">{a.zone}</td>
+                      <td className="text-[var(--text-dim)] font-medium">{a.zone}</td>
                       <td>
-                        <span className="healthbar">
-                          <span className="healthbar-fill" style={{ width: `${a.health}%`, background: healthColor }}></span>
-                        </span>
-                        {a.health}%
+                        <div className="flex items-center gap-2">
+                          <span className="healthbar bg-[var(--surface-secondary)]">
+                            <span className="healthbar-fill" style={{ width: `${a.health}%`, background: healthColor }}></span>
+                          </span>
+                          <span className="text-xs font-mono text-[var(--text)]">{a.health}%</span>
+                        </div>
                       </td>
-                      <td className="text-xs text-slate-300">
+                      <td className="text-xs text-[var(--text-dim)] font-mono">
                         <div>{a.temperature}°C</div>
-                        <div className="text-[11px] text-slate-400">{a.vibration} mm/s</div>
+                        <div className="text-[10px] text-[var(--text-mute)]">{a.vibration} mm/s</div>
                       </td>
                       <td>
                         <span className={`pill ${pillClass}`}>{a.status}</span>
                       </td>
-                      <td className="text-slate-400">{a.nextMaintenance}</td>
-                      <td className="text-slate-300 text-xs max-w-xs">{a.recommendation}</td>
-                      <td>
-                        <div className="flex gap-2">
+                      <td className="text-[var(--text-dim)]">{a.nextMaintenance}</td>
+                      <td className="text-[var(--text-dim)] text-xs max-w-xs truncate">{a.recommendation}</td>
+                      <td className="text-right">
+                        <div className="flex gap-1 justify-end">
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
                               setEditingAsset(a);
                               setIsModalOpen(true);
                             }}
-                            className="p-1.5 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white"
+                            className="p-1 rounded hover:bg-[var(--surface-secondary)] text-[var(--text-dim)] hover:text-[var(--text)]"
                           >
-                            <Edit2 size={14} />
+                            <Edit2 size={13} />
                           </button>
                           <button
                             onClick={(e) => handleDeleteAsset(a.id, e)}
-                            className="p-1.5 rounded-lg hover:bg-red-500/20 text-slate-400 hover:text-red-400"
+                            className="p-1 rounded hover:bg-red-500/10 text-[var(--text-dim)] hover:text-[var(--red)]"
                           >
-                            <Trash2 size={14} />
+                            <Trash2 size={13} />
                           </button>
                         </div>
                       </td>

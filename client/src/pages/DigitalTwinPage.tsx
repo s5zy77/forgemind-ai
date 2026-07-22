@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import api from '../services/api';
 import { Asset } from '../../../shared/types';
 import { useSocket } from '../context/SocketContext';
-import { Activity, Thermometer, Radio, X, AlertTriangle } from 'lucide-react';
+import { Activity, Thermometer, Radio, X, AlertTriangle, MonitorPlay } from 'lucide-react';
 
 export const DigitalTwinPage: React.FC = () => {
   const [assets, setAssets] = useState<Asset[]>([]);
@@ -34,53 +34,51 @@ export const DigitalTwinPage: React.FC = () => {
   });
 
   const colorMap: Record<string, string> = {
-    healthy: '#22c55e',
-    warning: '#f59e0b',
-    critical: '#ef4444',
+    healthy: 'var(--green)',
+    warning: 'var(--orange)',
+    critical: 'var(--red)',
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 select-none">
       <div className="flex justify-between items-center">
         <div>
-          <div className="section-title">Digital Twin</div>
-          <div className="section-sub">Live plant floor visualization — real-time WebSocket telemetry feed</div>
+          <div className="section-title text-base font-semibold">Digital Twin</div>
+          <div className="section-sub text-xs text-[var(--text-mute)] font-medium">Virtual plant telemetry models mapped over operational grids</div>
         </div>
 
-        <div className="flex items-center gap-2 text-xs text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-full">
-          <Radio size={14} className="animate-pulse" /> Socket.IO Broadcaster Active
+        <div className="flex items-center gap-1.5 text-[10px] font-semibold text-emerald-500 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full">
+          <Radio size={12} className="animate-pulse" /> Live Telemetry Broadcast
         </div>
       </div>
 
-      <div className="card border-[var(--border)] bg-[var(--card)]">
-        <div className="twin-floor">
+      <div className="border border-[var(--border)] bg-[var(--surface)] p-5 rounded-xl shadow-sm">
+        <div className="twin-floor border border-[var(--border)] bg-[var(--surface-secondary)] rounded-xl relative overflow-hidden h-[380px]">
           {displayMachines.map((m) => {
-            const color = colorMap[m.status] || '#3b82f6';
+            const color = colorMap[m.status] || 'var(--blue)';
             const isCritical = m.status === 'critical' || m.temperature > 100 || m.vibration > 4.0;
 
             return (
               <div
                 key={m.id}
-                className="twin-machine"
+                className="twin-machine absolute rounded-lg bg-[var(--surface)] border flex flex-col items-center justify-center p-2 cursor-pointer shadow-sm hover:scale-105 transition-all"
                 style={{
                   left: `${m.gridX}px`,
                   top: `${m.gridY}px`,
                   width: `${m.gridW}px`,
                   height: `${m.gridH}px`,
-                  background: `${color}18`,
                   borderColor: color,
                   color: color,
-                  animation: isCritical ? 'critpulse 1.4s infinite' : 'none',
                 }}
                 onClick={() => setSelectedMachine(m)}
                 title={`${m.id} — Temp: ${m.temperature}°C, Vib: ${m.vibration} mm/s`}
               >
                 <div className="text-center relative">
                   {isCritical && (
-                    <AlertTriangle size={12} className="absolute -top-3 -right-3 text-red-500 animate-bounce" />
+                    <AlertTriangle size={11} className="absolute -top-3 -right-3 text-[var(--red)] animate-bounce" />
                   )}
-                  <div className="font-bold text-xs">{m.id}</div>
-                  <div className="text-[10px] opacity-90 font-normal">
+                  <div className="font-bold text-[10px] text-[var(--text)]">{m.id}</div>
+                  <div className="text-[9px] text-[var(--text-mute)] font-normal mt-0.5 font-mono">
                     {m.temperature}°C · {m.status}
                   </div>
                 </div>
@@ -90,48 +88,48 @@ export const DigitalTwinPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Machine Intelligence Drawer / Modal */}
+      {/* Machine Diagnostic Overlay Modal */}
       {selectedMachine && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className="w-full max-w-lg rounded-2xl bg-[var(--card)] border border-white/10 p-6 shadow-2xl space-y-4">
-            <div className="flex justify-between items-center pb-3 border-b border-white/10">
-              <h3 className="text-base font-bold text-[var(--text)] font-heading">
-                Digital Twin Telemetry — {selectedMachine.id}
+          <div className="w-full max-w-md rounded-2xl bg-[var(--surface)] border border-[var(--border)] p-5 shadow-2xl space-y-4">
+            <div className="flex justify-between items-center pb-3 border-b border-[var(--border)]">
+              <h3 className="text-sm font-bold text-[var(--text)] flex items-center gap-1.5">
+                <MonitorPlay size={14} className="text-[var(--blue)]" /> Diagnostic Console — {selectedMachine.id}
               </h3>
-              <button onClick={() => setSelectedMachine(null)} className="p-1 text-[var(--text-mute)] hover:bg-white/10 rounded-lg">
-                <X size={18} />
+              <button onClick={() => setSelectedMachine(null)} className="p-1 text-[var(--text-mute)] hover:bg-[var(--surface-secondary)] rounded-lg">
+                <X size={16} />
               </button>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="p-3 bg-[var(--card2)] border border-white/10 rounded-xl">
-                <div className="flex items-center gap-2 text-xs text-[var(--text-dim)] mb-1">
-                  <Thermometer size={14} className="text-orange-400" /> Temperature
+            <div className="grid grid-cols-2 gap-3">
+              <div className="p-3 bg-[var(--surface-secondary)] border border-[var(--border)] rounded-xl space-y-1">
+                <div className="flex items-center gap-1.5 text-[10px] text-[var(--text-mute)] uppercase font-semibold">
+                  <Thermometer size={12} className="text-orange-500" /> Temperature
                 </div>
-                <div className="text-xl font-bold text-[var(--text)]">{selectedMachine.temperature}°C</div>
+                <div className="text-lg font-bold text-[var(--text)] font-mono">{selectedMachine.temperature}°C</div>
               </div>
 
-              <div className="p-3 bg-[var(--card2)] border border-white/10 rounded-xl">
-                <div className="flex items-center gap-2 text-xs text-[var(--text-dim)] mb-1">
-                  <Activity size={14} className="text-cyan-400" /> Vibration
+              <div className="p-3 bg-[var(--surface-secondary)] border border-[var(--border)] rounded-xl space-y-1">
+                <div className="flex items-center gap-1.5 text-[10px] text-[var(--text-mute)] uppercase font-semibold">
+                  <Activity size={12} className="text-cyan-500" /> Vibration
                 </div>
-                <div className="text-xl font-bold text-[var(--text)]">{selectedMachine.vibration} mm/s</div>
+                <div className="text-lg font-bold text-[var(--text)] font-mono">{selectedMachine.vibration} mm/s</div>
               </div>
             </div>
 
-            <div className="space-y-2">
-              <div className="text-xs font-semibold text-[var(--text-dim)] uppercase">AI Recommendation</div>
-              <div className="text-xs text-[var(--text)] p-3 bg-white/5 border border-white/10 rounded-xl">
+            <div className="space-y-1.5">
+              <div className="text-[10px] font-semibold text-[var(--text-mute)] uppercase">Maintenance Instruction</div>
+              <div className="text-xs text-[var(--text-dim)] p-3 bg-[var(--surface-secondary)] border border-[var(--border)] rounded-xl leading-relaxed">
                 {selectedMachine.recommendation}
               </div>
             </div>
 
-            <div className="flex justify-end pt-2">
+            <div className="flex justify-end pt-2 border-t border-[var(--border)]">
               <button
                 onClick={() => setSelectedMachine(null)}
-                className="px-4 py-2 text-xs font-semibold text-white bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg shadow-lg hover:opacity-90"
+                className="px-4 py-1.5 text-xs font-semibold text-[var(--bg)] bg-[var(--primary)] rounded-lg shadow-sm hover:opacity-90 transition-all"
               >
-                Done
+                Close Dashboard
               </button>
             </div>
           </div>

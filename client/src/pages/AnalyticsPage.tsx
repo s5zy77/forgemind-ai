@@ -45,8 +45,8 @@ export const AnalyticsPage: React.FC = () => {
     fetchAnalytics();
   }, []);
 
-  const commonGrid = { color: 'rgba(255, 255, 255, 0.04)' };
-  const commonTicks = { color: '#5b6577' };
+  const commonGrid = { color: 'rgba(113, 113, 122, 0.08)' };
+  const commonTicks = { color: '#71717a', font: { size: 10, family: 'Inter' } };
 
   const downtimeData = {
     labels: analytics?.downtimeByCause?.labels || ['Mechanical', 'Electrical', 'Sensor fault', 'Human error', 'Scheduled'],
@@ -76,9 +76,9 @@ export const AnalyticsPage: React.FC = () => {
         label: 'Cost ($k)',
         data: analytics?.costTrend?.data || [38, 42, 35, 48, 44, 51],
         borderColor: '#a855f7',
-        backgroundColor: 'rgba(168,85,247,0.1)',
+        backgroundColor: 'rgba(168,85,247,0.03)',
         fill: true,
-        tension: 0.35,
+        tension: 0.25,
       },
     ],
   };
@@ -90,22 +90,22 @@ export const AnalyticsPage: React.FC = () => {
         label: 'Fleet risk',
         data: analytics?.riskRadar?.data || [62, 45, 38, 55, 30, 48],
         borderColor: '#ef4444',
-        backgroundColor: 'rgba(239,68,68,0.15)',
+        backgroundColor: 'rgba(239,68,68,0.08)',
       },
     ],
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 select-none max-w-4xl mx-auto">
       <div>
-        <div className="section-title">Analytics</div>
-        <div className="section-sub">Fleet-wide operational performance & diagnostic breakdown</div>
+        <div className="section-title text-base font-semibold">Operational Analytics</div>
+        <div className="section-sub text-xs text-[var(--text-mute)] font-medium">Fleet downtime vectors, utilization performance, and operational cost metrics</div>
       </div>
 
-      <div className="grid grid-2">
-        <div className="card">
-          <div className="section-title text-base">Downtime by cause (hrs / month)</div>
-          <div style={{ height: '260px', position: 'relative', marginTop: '12px' }}>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="card border border-[var(--border)] bg-[var(--surface)] p-4 rounded-xl shadow-sm">
+          <div className="section-title text-xs font-semibold uppercase tracking-wider text-[var(--text-mute)] mb-2">Downtime by cause (hrs / month)</div>
+          <div style={{ height: '220px', position: 'relative' }}>
             <Bar
               data={downtimeData}
               options={{
@@ -118,25 +118,25 @@ export const AnalyticsPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="card">
-          <div className="section-title text-base">Asset utilization</div>
-          <div style={{ height: '260px', position: 'relative', marginTop: '12px' }}>
+        <div className="card border border-[var(--border)] bg-[var(--surface)] p-4 rounded-xl shadow-sm">
+          <div className="section-title text-xs font-semibold uppercase tracking-wider text-[var(--text-mute)] mb-2">Asset utilization</div>
+          <div style={{ height: '220px', position: 'relative' }}>
             <Doughnut
               data={utilData}
               options={{
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { position: 'bottom', labels: { color: '#8b96a8', font: { size: 11 } } } },
+                plugins: { legend: { position: 'bottom', labels: { color: '#71717a', font: { size: 10, family: 'Inter' } } } },
               }}
             />
           </div>
         </div>
       </div>
 
-      <div className="grid grid-2">
-        <div className="card">
-          <div className="section-title text-base">Maintenance cost trend ($k)</div>
-          <div style={{ height: '240px', position: 'relative', marginTop: '12px' }}>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="card border border-[var(--border)] bg-[var(--surface)] p-4 rounded-xl shadow-sm">
+          <div className="section-title text-xs font-semibold uppercase tracking-wider text-[var(--text-mute)] mb-2">Maintenance cost trend ($k)</div>
+          <div style={{ height: '220px', position: 'relative' }}>
             <Line
               data={costData}
               options={{
@@ -149,9 +149,9 @@ export const AnalyticsPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="card">
-          <div className="section-title text-base">Fleet Risk Distribution Radar</div>
-          <div style={{ height: '240px', position: 'relative', marginTop: '12px' }}>
+        <div className="card border border-[var(--border)] bg-[var(--surface)] p-4 rounded-xl shadow-sm">
+          <div className="section-title text-xs font-semibold uppercase tracking-wider text-[var(--text-mute)] mb-2">Fleet Risk Distribution Radar</div>
+          <div style={{ height: '220px', position: 'relative' }}>
             <Radar
               data={riskData}
               options={{
@@ -160,9 +160,9 @@ export const AnalyticsPage: React.FC = () => {
                 plugins: { legend: { display: false } },
                 scales: {
                   r: {
-                    angleLines: { color: 'rgba(255,255,255,0.06)' },
-                    grid: { color: 'rgba(255,255,255,0.06)' },
-                    pointLabels: { color: '#8b96a8', font: { size: 10 } },
+                    angleLines: { color: 'rgba(113, 113, 122, 0.08)' },
+                    grid: { color: 'rgba(113, 113, 122, 0.08)' },
+                    pointLabels: { color: '#71717a', font: { size: 9, family: 'Inter' } },
                     ticks: { display: false },
                   },
                 },

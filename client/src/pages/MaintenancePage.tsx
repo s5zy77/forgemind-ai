@@ -42,25 +42,25 @@ export const MaintenancePage: React.FC = () => {
       {
         label: 'Chiller-C2',
         data: [10, 18, 25, 33, 42, 55, 63, 71, 80, 86, 91, 95],
-        borderColor: '#ef4444',
-        backgroundColor: 'rgba(239, 68, 68, 0.08)',
-        tension: 0.3,
+        borderColor: '#dc2626',
+        backgroundColor: 'rgba(220, 38, 38, 0.03)',
+        tension: 0.25,
         fill: true,
       },
       {
         label: 'Boiler-22',
         data: [8, 12, 17, 22, 29, 35, 44, 52, 60, 68, 75, 82],
-        borderColor: '#f59e0b',
-        backgroundColor: 'rgba(245, 158, 11, 0.08)',
-        tension: 0.3,
+        borderColor: '#d97706',
+        backgroundColor: 'rgba(217, 119, 6, 0.03)',
+        tension: 0.25,
         fill: true,
       },
       {
         label: 'Compressor-X4',
         data: [3, 4, 6, 7, 9, 11, 13, 16, 19, 22, 25, 29],
-        borderColor: '#22d3ee',
-        backgroundColor: 'rgba(34, 211, 238, 0.06)',
-        tension: 0.3,
+        borderColor: '#0891b2',
+        backgroundColor: 'rgba(8, 145, 178, 0.02)',
+        tension: 0.25,
         fill: true,
       },
     ],
@@ -70,46 +70,50 @@ export const MaintenancePage: React.FC = () => {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: { labels: { color: '#8b96a8', font: { size: 11 } } },
+      legend: { labels: { color: '#71717a', font: { size: 10, family: 'Inter' } } },
     },
     scales: {
-      x: { ticks: { color: '#5b6577' }, grid: { color: 'rgba(255, 255, 255, 0.04)' } },
+      x: { ticks: { color: '#71717a', font: { size: 10 } }, grid: { color: 'rgba(0,0,0,0.02)' } },
       y: {
-        ticks: { color: '#5b6577' },
-        grid: { color: 'rgba(255, 255, 255, 0.04)' },
-        title: { display: true, text: 'Failure probability %', color: '#8b96a8' },
+        ticks: { color: '#71717a', font: { size: 10 } },
+        grid: { color: 'rgba(0,0,0,0.03)' },
+        title: { display: true, text: 'Probability (%)', color: '#71717a', font: { size: 10 } },
       },
     },
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 select-none max-w-4xl mx-auto">
       <div>
-        <div className="section-title">Predictive Maintenance</div>
-        <div className="section-sub">Remaining useful life & failure forecasting engine</div>
+        <div className="section-title text-base font-semibold">Predictive Maintenance</div>
+        <div className="section-sub text-xs text-[var(--text-mute)] font-medium">Predictive decay remaining useful life (RUL) modeling</div>
       </div>
 
       {/* RUL Cards */}
-      <div className="grid grid-3">
-        {topCritical.map((r, i) => (
-          <div key={i} className="card">
-            <div className="text-xs text-slate-400">{r.assetId} — {r.assetName}</div>
-            <div className="text-2xl font-bold mt-2" style={{ color: r.riskColor }}>
-              {r.remainingDays} days
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {loading ? (
+          <div className="col-span-3 text-center py-6 text-xs text-[var(--text-mute)]">Loading forecast metrics...</div>
+        ) : (
+          topCritical.map((r, i) => (
+            <div key={i} className="card border border-[var(--border)] bg-[var(--surface)] p-4 rounded-xl shadow-sm space-y-2">
+              <div className="text-[10px] font-bold text-[var(--text-mute)] uppercase tracking-wider">{r.assetId}</div>
+              <div className="text-xl font-bold tracking-tight" style={{ color: r.riskColor }}>
+                {r.remainingDays} days
+              </div>
+              <div className="text-[10.5px] text-[var(--text-dim)]">Remaining Useful Life (RUL)</div>
+              <div className="pt-2 border-t border-[var(--border)] flex justify-between items-center text-[10px] font-medium text-[var(--text-mute)]">
+                <span>Failure Risk:</span>
+                <span className="text-[var(--text)] font-semibold">{r.failureProbability}%</span>
+              </div>
             </div>
-            <div className="text-xs text-slate-500 mt-1">Estimated remaining useful life (RUL)</div>
-            <div className="mt-3 flex items-center justify-between text-xs pt-2 border-t border-white/10">
-              <span className="text-slate-400">Failure Probability:</span>
-              <span className="font-semibold text-white">{r.failureProbability}%</span>
-            </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
 
       {/* RUL Line Chart */}
-      <div className="card">
-        <div className="section-title text-base">Failure probability trend — next 90 days</div>
-        <div style={{ height: '300px', position: 'relative', marginTop: '14px' }}>
+      <div className="card border border-[var(--border)] bg-[var(--surface)] p-5 rounded-xl shadow-sm">
+        <div className="section-title text-sm font-semibold mb-4">Failure Probability Trend (90 days)</div>
+        <div style={{ height: '280px', position: 'relative' }}>
           <Line data={chartData} options={chartOptions} />
         </div>
       </div>
