@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Send, Mic, Paperclip, Sparkles, CheckCircle2, FileText } from 'lucide-react';
 import api from '../services/api';
 import { AIChatMessage } from '../../../shared/types';
@@ -14,6 +14,8 @@ export const BrainPage: React.FC = () => {
   ]);
   const [inputQuery, setInputQuery] = useState('');
   const [loading, setLoading] = useState(false);
+  const [panelWidth, setPanelWidth] = useState(260);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const suggestedPrompts = [
     'Why is Pump-101 vibrating?',
@@ -21,6 +23,11 @@ export const BrainPage: React.FC = () => {
     'Show all critical assets',
     'Compare Compressor-X4 and X5',
   ];
+
+  // Auto-scroll chat container on new content
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
   const handleSend = async (textToSend?: string) => {
     const query = textToSend || inputQuery.trim();
@@ -39,15 +46,38 @@ export const BrainPage: React.FC = () => {
 
     try {
       const res = await api.post('/ai/query', { query });
-      const aiMsg: AIChatMessage = {
-        id: `ai-${Date.now()}`,
+      
+      const fullText = res.data.text;
+      const responseId = `ai-${Date.now()}`;
+
+      // Initialize streaming block
+      const initAiMsg: AIChatMessage = {
+        id: responseId,
         role: 'ai',
-        text: res.data.text,
+        text: '',
         sources: res.data.sources,
         confidence: res.data.confidence,
         timestamp: new Date().toLocaleTimeString(),
       };
-      setMessages((prev) => [...prev, aiMsg]);
+
+      setMessages((prev) => [...prev, initAiMsg]);
+      setLoading(false);
+
+      const words = fullText.split(' ');
+      let currentText = '';
+      let index = 0;
+
+      const timer = setInterval(() => {
+        if (index < words.length) {
+          currentText += (index === 0 ? '' : ' ') + words[index];
+          setMessages((prev) =>
+            prev.map((m) => (m.id === responseId ? { ...m, text: currentText } : m))
+          );
+          index++;
+        } else {
+          clearInterval(timer);
+        }
+      }, 25);
     } catch (err) {
       console.error('Failed to query AI:', err);
       setMessages((prev) => [
@@ -59,22 +89,26 @@ export const BrainPage: React.FC = () => {
           timestamp: new Date().toLocaleTimeString(),
         },
       ]);
-    } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 h-full flex flex-col">
       <div>
         <div className="section-title">Operations Brain</div>
         <div className="section-sub">Natural-language reasoning across assets, documents, and operational history.</div>
       </div>
 
-      <div className="chat-shell">
+      <div 
+        className="chat-shell flex-grow"
+        style={{ gridTemplateColumns: `${panelWidth}px 1fr` }}
+      >
         {/* Chat History Sidebar */}
-        <div className="card chat-history hidden md:block">
-          <div className="text-[11.5px] text-slate-400 uppercase tracking-wider mb-3 font-semibold">Recent Sessions</div>
+        <div className="card chat-history hidden md:block select-none">
+          <div className="text-[11.5px] text-[var(--text-mute)] uppercase tracking-wider mb-3 font-semibold">
+            Recent Sessions
+          </div>
           {suggestedPrompts.map((prompt, idx) => (
             <div
               key={idx}
@@ -87,10 +121,10 @@ export const BrainPage: React.FC = () => {
         </div>
 
         {/* Main Chat Interface */}
-        <div className="card chat-main flex flex-col h-full">
-          <div className="chat-messages">
+        <div className="card chat-main flex flex-col h-full relative overflow-hidden bg-[var(--card)] border-[var(--border)]">
+          <div className="chat-messages flex-grow overflow-y-auto space-y-4 pb-24 pr-2">
             {messages.map((m) => (
-              <div key={m.id} className={`msg ${m.role}`}>
+              <div key={m.id} className={`msg ${m.role} animate-fadeIn`}>
                 <div
                   className="msg-bubble"
                   dangerouslySetInnerHTML={{ __html: m.text }}
@@ -119,6 +153,7 @@ export const BrainPage: React.FC = () => {
                 </div>
               </div>
             )}
+            <div ref={messagesEndRef} />
           </div>
 
           {/* Suggested Prompts */}
@@ -132,14 +167,14 @@ export const BrainPage: React.FC = () => {
 
           {/* Input Bar */}
           <div className="chat-input-row">
-            <button className="mini-icon-btn" title="Voice Input">
+            <button className="mini-icon-btn text-[var(--text-mute)] hover:text-white" title="Voice Input">
               <Mic size={16} />
             </button>
-            <button className="mini-icon-btn" title="Attach Document / Manual">
+            <button className="mini-icon-btn text-[var(--text-mute)] hover:text-white" title="Attach Document / Manual">
               <Paperclip size={16} />
             </button>
             <input
-              className="chat-input"
+              className="chat-input border-[var(--border)] bg-[var(--card2)] text-[var(--text)] placeholder-[var(--text-mute)]"
               placeholder="Ask about any asset, failure, or maintenance plan..."
               value={inputQuery}
               onChange={(e) => setInputQuery(e.target.value)}

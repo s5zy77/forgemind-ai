@@ -2,6 +2,8 @@ import express from 'express';
 import http from 'http';
 import { Server } from 'socket.io';
 import cors from 'cors';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
 import apiRoutes from './routes/api';
 import { prisma } from './services/db';
@@ -18,8 +20,26 @@ const io = new Server(server, {
   },
 });
 
-app.use(cors());
+// Production Security Configuration
+app.use(helmet());
+app.use(
+  cors({
+    origin: process.env.CORS_ORIGIN || '*',
+    methods: ['GET', 'POST', 'PATCH', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  })
+);
 app.use(express.json());
+
+// Apply rate limiting (Max 150 requests per 10 minutes on API routes)
+const limiter = rateLimit({
+  windowMs: 10 * 60 * 1000,
+  max: 150,
+  message: { error: 'Too many requests from this IP. Please try again after 10 minutes.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use('/api', limiter);
 
 // API Routes
 app.use('/api', apiRoutes);

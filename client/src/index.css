@@ -2,10 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --bg: #07111f;
-  --card: #111827;
-  --card2: #0d1622;
+:root, :root[data-theme='dark'] {
+  --bg: #0a0f1d;
+  --card: #121b2d;
+  --card2: #0e1424;
   --border: rgba(255, 255, 255, 0.08);
   --border-strong: rgba(255, 255, 255, 0.14);
   --blue: #3b82f6;
@@ -15,8 +15,27 @@
   --orange: #f59e0b;
   --red: #ef4444;
   --text: #e6edf5;
-  --text-dim: #8b96a8;
-  --text-mute: #5b6577;
+  --text-dim: #94a3b8;
+  --text-mute: #64748b;
+  --scrollbar-thumb: rgba(255, 255, 255, 0.15);
+}
+
+:root[data-theme='light'] {
+  --bg: #f8f9fa;
+  --card: #ffffff;
+  --card2: #f1f3f5;
+  --border: rgba(0, 0, 0, 0.08);
+  --border-strong: rgba(0, 0, 0, 0.14);
+  --blue: #2563eb;
+  --cyan: #0891b2;
+  --purple: #7c3aed;
+  --green: #16a34a;
+  --orange: #d97706;
+  --red: #dc2626;
+  --text: #1e293b;
+  --text-dim: #475569;
+  --text-mute: #64748b;
+  --scrollbar-thumb: rgba(0, 0, 0, 0.15);
 }
 
 * {
@@ -28,12 +47,13 @@
 body {
   font-family: 'Inter', sans-serif;
   background:
-    radial-gradient(circle at 15% 0%, rgba(59, 130, 246, 0.10), transparent 40%),
-    radial-gradient(circle at 85% 10%, rgba(168, 85, 247, 0.10), transparent 40%),
+    radial-gradient(circle at 15% 0%, rgba(59, 130, 246, 0.08), transparent 40%),
+    radial-gradient(circle at 85% 10%, rgba(168, 85, 247, 0.08), transparent 40%),
     var(--bg);
   color: var(--text);
   min-height: 100vh;
   overflow-x: hidden;
+  transition: background 0.2s ease, color 0.2s ease;
 }
 
 h1, h2, h3, .brand, .logo-text, .font-heading {
@@ -46,7 +66,7 @@ h1, h2, h3, .brand, .logo-text, .font-heading {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
+  background: var(--scrollbar-thumb);
   border-radius: 8px;
 }
 

@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
+import { useTheme } from '../context/ThemeContext';
 
 export const SettingsPage: React.FC = () => {
+  const { theme, toggleTheme } = useTheme();
   const [toggles, setToggles] = useState({
-    theme: true,
     alertPush: true,
     autoDiagnosis: true,
     voiceInput: false,
@@ -22,12 +23,12 @@ export const SettingsPage: React.FC = () => {
       <div className="card max-w-lg space-y-6">
         <div className="flex justify-between items-center">
           <div>
-            <div className="text-sm font-medium text-white">Dark Enterprise Theme</div>
-            <div className="text-xs text-slate-500">Optimized for high-density plant operations</div>
+            <div className="text-sm font-medium text-[var(--text)]">Dark Enterprise Theme</div>
+            <div className="text-xs text-[var(--text-mute)]">Optimized for high-density plant operations</div>
           </div>
           <div
-            className={`toggle ${toggles.theme ? 'on' : ''}`}
-            onClick={() => toggleSetting('theme')}
+            className={`toggle ${theme === 'dark' ? 'on' : ''}`}
+            onClick={toggleTheme}
           >
             <div className="toggle-knob"></div>
           </div>
@@ -35,8 +36,8 @@ export const SettingsPage: React.FC = () => {
 
         <div className="flex justify-between items-center">
           <div>
-            <div className="text-sm font-medium text-white">Real-Time Alert Push</div>
-            <div className="text-xs text-slate-500">Push critical alerts to topbar badge</div>
+            <div className="text-sm font-medium text-[var(--text)]">Real-Time Alert Push</div>
+            <div className="text-xs text-[var(--text-mute)]">Push critical alerts to topbar badge</div>
           </div>
           <div
             className={`toggle ${toggles.alertPush ? 'on' : ''}`}
@@ -48,8 +49,8 @@ export const SettingsPage: React.FC = () => {
 
         <div className="flex justify-between items-center">
           <div>
-            <div className="text-sm font-medium text-white">AI Auto-Diagnosis Engine</div>
-            <div className="text-xs text-slate-500">Automatically summarize root causes for new trips</div>
+            <div className="text-sm font-medium text-[var(--text)]">AI Auto-Diagnosis Engine</div>
+            <div className="text-xs text-[var(--text-mute)]">Automatically summarize root causes for new trips</div>
           </div>
           <div
             className={`toggle ${toggles.autoDiagnosis ? 'on' : ''}`}
@@ -61,8 +62,8 @@ export const SettingsPage: React.FC = () => {
 
         <div className="flex justify-between items-center">
           <div>
-            <div className="text-sm font-medium text-white">Voice Input & Speech Reasoning</div>
-            <div className="text-xs text-slate-500">Enable voice queries in Operations Brain</div>
+            <div className="text-sm font-medium text-[var(--text)]">Voice Input & Speech Reasoning</div>
+            <div className="text-xs text-[var(--text-mute)]">Enable voice queries in Operations Brain</div>
           </div>
           <div
             className={`toggle ${toggles.voiceInput ? 'on' : ''}`}
