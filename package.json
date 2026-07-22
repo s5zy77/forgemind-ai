@@ -1,0 +1,27 @@
+{
+  "name": "forgemind-ai",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ForgeMind AI — Industrial Knowledge Intelligence Platform",
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev --workspace=server\" \"npm run dev --workspace=client\"",
+    "build": "npm run build --workspace=server && npm run build --workspace=client",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:seed": "ts-node --transpile-only prisma/seed.ts",
+    "postinstall": "prisma generate"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "prisma": "^5.10.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.10.2"
+  }
+}

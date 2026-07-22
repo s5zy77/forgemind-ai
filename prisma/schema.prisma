@@ -1,0 +1,110 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      String   @default("ENGINEER") // ADMIN, ENGINEER, OPERATOR
+  avatar    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Asset {
+  id              String             @id
+  name            String
+  zone            String
+  type            String
+  health          Float              @default(100.0)
+  riskScore       Float              @default(0.0)
+  temperature     Float              @default(50.0)
+  vibration       Float              @default(1.0)
+  status          String             @default("healthy") // healthy, warning, critical
+  nextMaintenance String
+  recommendation  String
+  description     String?
+  gridX           Int                @default(0)
+  gridY           Int                @default(0)
+  gridW           Int                @default(100)
+  gridH           Int                @default(80)
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+  manuals         ManualDocument[]
+  incidents       Incident[]
+  telemetries     TelemetryRecord[]
+  maintenanceLogs MaintenanceRecord[]
+}
+
+model TelemetryRecord {
+  id          String   @id @default(uuid())
+  assetId     String
+  asset       Asset    @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  temperature Float
+  vibration   Float
+  healthScore Float
+  timestamp   DateTime @default(now())
+}
+
+model Incident {
+  id          String   @id @default(uuid())
+  assetId     String?
+  asset       Asset?   @relation(fields: [assetId], references: [id], onDelete: SetNull)
+  title       String
+  type        String
+  severity    String   @default("medium") // low, medium, high, critical
+  status      String   @default("open")   // open, investigating, resolved
+  date        String
+  description String
+  rootCause   String?
+  resolution  String?
+  createdAt   DateTime @default(now())
+}
+
+model MaintenanceRecord {
+  id            String    @id @default(uuid())
+  assetId       String
+  asset         Asset     @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  scheduledDate String
+  completedDate String?
+  technician    String
+  type          String
+  notes         String
+  status        String    @default("pending") // pending, in_progress, completed
+  createdAt     DateTime  @default(now())
+}
+
+model ManualDocument {
+  id        String   @id @default(uuid())
+  assetId   String?
+  asset     Asset?   @relation(fields: [assetId], references: [id], onDelete: SetNull)
+  title     String
+  category  String
+  content   String
+  fileUrl   String?
+  createdAt DateTime @default(now())
+}
+
+model GraphNode {
+  id       String  @id
+  name     String
+  type     String  // asset, engineer, document, failure, supplier
+  x        Float?
+  y        Float?
+  r        Float?
+  metadata String? // JSON string
+}
+
+model GraphEdge {
+  id     String  @id @default(uuid())
+  source String
+  target String
+  label  String?
+}
